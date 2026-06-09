@@ -83,7 +83,7 @@ textarea {
   top: 0;
   z-index: 20;
   flex: 0 0 auto;
-  padding: 12px 14px 10px;
+  padding: 8px 10px 6px;
   background: rgba(248, 249, 251, 0.92);
   backdrop-filter: blur(18px);
   /* 窗口拖拽由 app-shell 统一处理，这里只避免标题栏文字被误选中。 */
@@ -97,15 +97,15 @@ textarea {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-  padding: 0 14px 14px;
+  padding: 0 10px 10px;
 }
 
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   /* 给 macOS 左上角原生三色按钮预留安全区，避免标题和按钮互相遮挡。 */
-  padding: 4px 0 10px 74px;
+  padding: 2px 0 6px 70px;
   background: transparent;
   border: 0;
 }
@@ -113,7 +113,38 @@ textarea {
 .toolbar-drag-fill {
   flex: 1 1 auto;
   align-self: stretch;
-  min-width: 24px;
+  min-width: 16px;
+}
+
+.toolbar-controls {
+  /* 路径和操作按钮作为同一组靠右排列，路径始终显示在按钮上方。 */
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  min-width: 0;
+}
+
+.header-paths {
+  display: grid;
+  gap: 2px;
+  max-width: min(420px, 42vw);
+}
+
+.header-path-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  min-width: 0;
+  color: #7b8594;
+  font-size: 0.68rem;
+}
+
+.header-path-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .toolbar-left,
@@ -126,17 +157,17 @@ textarea {
 .sheet-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   flex-wrap: wrap;
 }
 
 .app-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
   display: grid;
   place-items: center;
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 700;
   color: #2459d6;
   background: linear-gradient(180deg, #edf4ff, #dbe8ff);
@@ -148,15 +179,15 @@ textarea {
 }
 
 .toolbar-subtitle {
-  margin: 4px 0 0;
-  font-size: 0.8rem;
+  margin: 2px 0 0;
+  font-size: 0.72rem;
   color: #7a8493;
 }
 
 .eyebrow,
 .section-kicker {
-  margin: 0 0 3px;
-  font-size: 0.68rem;
+  margin: 0 0 2px;
+  font-size: 0.64rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #8a93a1;
@@ -165,7 +196,7 @@ textarea {
 .toolbar-title-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   flex-wrap: wrap;
 }
 
@@ -178,7 +209,7 @@ textarea {
 }
 
 .toolbar h1 {
-  font-size: 1.34rem;
+  font-size: 1.18rem;
   letter-spacing: -0.03em;
 }
 
@@ -188,11 +219,11 @@ textarea {
 .sync-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 26px;
+  gap: 5px;
+  min-height: 22px;
   border-radius: 999px;
-  padding: 0 10px;
-  font-size: 0.76rem;
+  padding: 0 8px;
+  font-size: 0.7rem;
   font-weight: 600;
 }
 
@@ -216,11 +247,11 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 34px;
-  border-radius: 10px;
-  padding: 0 12px;
-  font-size: 0.85rem;
+  gap: 6px;
+  min-height: 30px;
+  border-radius: 9px;
+  padding: 0 10px;
+  font-size: 0.78rem;
   font-weight: 600;
   transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
 }
@@ -349,8 +380,8 @@ textarea {
   grid-template-rows: minmax(0, 1fr);
   flex: 1 1 auto;
   min-height: 0;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .sidebar-panel,
@@ -365,7 +396,7 @@ textarea {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 12px;
+  padding: 9px;
 }
 
 .detail-panel {
@@ -377,19 +408,19 @@ textarea {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .section-header h2,
 .detail-topbar h2 {
-  font-size: 0.98rem;
+  font-size: 0.92rem;
 }
 
 .sidebar-header-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .profile-list {
@@ -397,17 +428,17 @@ textarea {
   grid-auto-rows: max-content;
   flex: 1 1 auto;
   min-height: 0;
-  gap: 7px;
+  gap: 5px;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-right: 3px;
 }
 
 .profile-card {
-  border-radius: 10px;
+  border-radius: 9px;
   border: 1px solid #e4e8ee;
   background: #fff;
-  padding: 10px;
+  padding: 8px;
 }
 
 .profile-card-active {
@@ -421,7 +452,7 @@ textarea {
 .profile-meta-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
@@ -434,16 +465,16 @@ textarea {
 }
 
 .profile-name-row {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .profile-name-row strong {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 700;
 }
 
 .profile-meta-row {
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .profile-meta-row span {
@@ -451,12 +482,12 @@ textarea {
   background: #f4f6f8;
   border: 1px solid #e6eaef;
   color: #717b89;
-  font-size: 0.72rem;
-  padding: 0.24rem 0.56rem;
+  font-size: 0.68rem;
+  padding: 0.18rem 0.48rem;
 }
 
 .profile-actions {
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .detail-topbar {
@@ -609,30 +640,6 @@ textarea {
   margin-top: 14px;
 }
 
-.sidebar-footer {
-  display: grid;
-  gap: 6px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #eceff4;
-}
-
-.sidebar-foot-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-width: 0;
-  font-size: 0.74rem;
-  color: #7b8594;
-}
-
-.sidebar-foot-row span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .spin {
   animation: spin 1s linear infinite;
 }
@@ -653,6 +660,16 @@ textarea {
   .section-header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .toolbar-controls,
+  .header-paths {
+    justify-items: stretch;
+    max-width: none;
+  }
+
+  .header-path-row {
+    justify-content: flex-start;
   }
 
   .workspace-grid {

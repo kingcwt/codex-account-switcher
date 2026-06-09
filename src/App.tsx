@@ -308,31 +308,48 @@ function App() {
 					{/* 这块保留弹性空白，窗口拖拽由 app-shell 的原生 startDragging 统一处理。 */}
 					<div className="toolbar-drag-fill" />
 
-					<div className="toolbar-actions">
-						{profiles.length > 0 ? (
+					<div className="toolbar-controls">
+						{/* 路径属于当前运行上下文，固定放在桌面同步操作上方便于随时核对。 */}
+						<div className="header-paths">
+							<div className="header-path-row">
+								<FolderCog size={12} />
+								<span>{appState?.codex_home ?? "~/.codex"}</span>
+							</div>
+							<div className="header-path-row">
+								<FolderCog size={12} />
+								<span>
+									{appState?.profiles_home ??
+										"~/.codex-switchboard/profiles"}
+								</span>
+							</div>
+						</div>
+
+						<div className="toolbar-actions">
+							{profiles.length > 0 ? (
+								<button
+									type="button"
+									className="ghost-button"
+									onClick={() => void handleSyncDesktopClients()}
+									disabled={isSubmitting}
+								>
+									<WandSparkles size={13} />
+									同步桌面应用
+								</button>
+							) : null}
 							<button
 								type="button"
 								className="ghost-button"
-								onClick={() => void handleSyncDesktopClients()}
-								disabled={isSubmitting}
+								onClick={() => openComposer("current")}
 							>
-								<WandSparkles size={14} />
-								同步桌面应用
+								<Import size={14} />
+								导入
 							</button>
-						) : null}
-						<button
-							type="button"
-							className="ghost-button"
-							onClick={() => openComposer("current")}
-						>
-							<Import size={16} />
-							导入
-						</button>
+						</div>
 					</div>
 				</div>
 			</header>
 
-			{/* 顶部 header 固定，下面的内容区单独滚动，避免滚动时影响原生操作栏附近的布局。 */}
+			{/* 顶部 header 和内容框架固定，仅账号列表内部滚动。 */}
 			<div className="app-main">
 				{successMessage ? (
 					<section
@@ -567,21 +584,6 @@ function App() {
 							</div>
 						)}
 
-						<div className="sidebar-footer">
-							<div className="sidebar-foot-row">
-								<FolderCog size={13} />
-								<span>
-									{appState?.codex_home ?? "~/.codex"}
-								</span>
-							</div>
-							<div className="sidebar-foot-row">
-								<FolderCog size={13} />
-								<span>
-									{appState?.profiles_home ??
-										"~/.codex-switchboard/profiles"}
-								</span>
-							</div>
-						</div>
 					</aside>
 				</section>
 			</div>
