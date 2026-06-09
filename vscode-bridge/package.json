@@ -1,0 +1,22 @@
+{
+  "name": "codex-switchboard-bridge",
+  "displayName": "Codex Switchboard Bridge",
+  "description": "Receives Codex Switchboard refresh requests in every VS Code window and restarts extension hosts.",
+  "version": "0.2.0",
+  "publisher": "cuihongran",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": ["Other"],
+  "extensionKind": ["ui"],
+  "activationEvents": ["onStartupFinished", "onUri"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codexSwitchboard.restartExtensionHost",
+        "title": "Codex Switchboard: Restart Extension Host"
+      }
+    ]
+  }
+}
