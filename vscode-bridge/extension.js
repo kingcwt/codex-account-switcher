@@ -49,7 +49,7 @@ function activate(context) {
 
   // 命令面板入口用于确认 bridge 能否在当前窗口重启扩展宿主。
   const restartCommand = vscode.commands.registerCommand(
-    "codexSwitchboard.restartExtensionHost",
+    "codexAccountSwitcher.restartExtensionHost",
     restartExtensionHost
   );
 

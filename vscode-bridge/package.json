@@ -1,7 +1,7 @@
 {
-  "name": "codex-switchboard-bridge",
-  "displayName": "Codex Switchboard Bridge",
-  "description": "Receives Codex Switchboard refresh requests in every VS Code window and restarts extension hosts.",
+  "name": "codex-account-switcher-bridge",
+  "displayName": "Codex Account Switcher Bridge",
+  "description": "Receives Codex Account Switcher refresh requests in every VS Code window and restarts extension hosts.",
   "version": "0.2.0",
   "publisher": "cuihongran",
   "engines": {
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "codexSwitchboard.restartExtensionHost",
-        "title": "Codex Switchboard: Restart Extension Host"
+        "command": "codexAccountSwitcher.restartExtensionHost",
+        "title": "Codex Account Switcher: Restart Extension Host"
       }
     ]
   }

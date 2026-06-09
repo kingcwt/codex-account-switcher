@@ -28,7 +28,7 @@ import {
 	switchProfile,
 	syncDesktopClients,
 	updateProfile
-} from "./lib/switchboard";
+} from "./lib/account-switcher";
 
 type ComposerMode = "current" | "edit";
 
@@ -95,7 +95,7 @@ function App() {
 		if (isTauriRuntime()) {
 			// 菜单栏切换账号后，主窗口也要立即刷新到同一份状态。
 			void listen<AppStatePayload>(
-				"switchboard://state-updated",
+				"account-switcher://state-updated",
 				(event) => {
 					setAppState(event.payload);
 				}
@@ -193,7 +193,7 @@ function App() {
 	};
 
 	const handleApplyProfile = async (profileId: string) => {
-		// 重新应用会把 Switchboard 中保存的 Profile 快照覆盖写入 ~/.codex。
+		// 重新应用会把 Account Switcher 中保存的 Profile 快照覆盖写入 ~/.codex。
 		setIsSubmitting(true);
 		setErrorMessage(null);
 
@@ -292,9 +292,9 @@ function App() {
 					<div className="toolbar-left">
 						<div className="app-mark">C</div>
 						<div className="toolbar-copy">
-							<p className="eyebrow">Codex Switchboard</p>
+							<p className="eyebrow">Codex Account Switcher</p>
 							<div className="toolbar-title-row">
-								<h1>Switchboard</h1>
+								<h1>Account Switcher</h1>
 								{activeProfile ? (
 									<span className="summary-pill">
 										当前: {activeProfile.name}

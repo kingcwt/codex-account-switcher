@@ -17,6 +17,8 @@
 
 应用不会修改数据库，也不会把账号信息上传到远端。所有 Profile 和备份均保存在本机：
 
+为兼容已有安装和账号快照，本地数据目录继续沿用 `~/.codex-switchboard/`。
+
 ```text
 ~/.codex-switchboard/
 ├── active-profile.json
@@ -66,15 +68,15 @@ cargo check --manifest-path src-tauri/Cargo.toml
 `codex-account-switcher` 切换账号后会更新 `~/.codex-switchboard/vscode-refresh.signal`。Bridge 扩展在每个 VS Code 窗口中监听该文件，并重启对应的扩展宿主，让 Codex 插件重新读取账号，同时保留当前窗口。
 
 ```bash
-mkdir -p /private/tmp/codex-switchboard-bridge-vsix/extension
-cp vscode-bridge/package.json vscode-bridge/extension.js vscode-bridge/README.md /private/tmp/codex-switchboard-bridge-vsix/extension/
-cp vscode-bridge/vsix/[Content_Types].xml vscode-bridge/vsix/extension.vsixmanifest /private/tmp/codex-switchboard-bridge-vsix/
-cd /private/tmp/codex-switchboard-bridge-vsix
-zip -qr /private/tmp/codex-switchboard-bridge-0.2.0.vsix .
-/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code --install-extension /private/tmp/codex-switchboard-bridge-0.2.0.vsix --force
+mkdir -p /private/tmp/codex-account-switcher-bridge-vsix/extension
+cp vscode-bridge/package.json vscode-bridge/extension.js vscode-bridge/README.md /private/tmp/codex-account-switcher-bridge-vsix/extension/
+cp vscode-bridge/vsix/[Content_Types].xml vscode-bridge/vsix/extension.vsixmanifest /private/tmp/codex-account-switcher-bridge-vsix/
+cd /private/tmp/codex-account-switcher-bridge-vsix
+zip -qr /private/tmp/codex-account-switcher-bridge-0.2.0.vsix .
+/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code --install-extension /private/tmp/codex-account-switcher-bridge-0.2.0.vsix --force
 ```
 
-安装后，可在 VS Code 命令面板运行 `Codex Switchboard: Restart Extension Host` 验证 Bridge。
+安装后，可在 VS Code 命令面板运行 `Codex Account Switcher: Restart Extension Host` 验证 Bridge。
 
 ## 技术栈
 

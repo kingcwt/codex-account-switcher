@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011">
   <Metadata>
-    <Identity Language="en-US" Id="codex-switchboard-bridge" Version="0.2.0" Publisher="cuihongran" />
-    <DisplayName>Codex Switchboard Bridge</DisplayName>
-    <Description xml:space="preserve">Receives Codex Switchboard refresh requests in every VS Code window and restarts extension hosts.</Description>
+    <Identity Language="en-US" Id="codex-account-switcher-bridge" Version="0.2.0" Publisher="cuihongran" />
+    <DisplayName>Codex Account Switcher Bridge</DisplayName>
+    <Description xml:space="preserve">Receives Codex Account Switcher refresh requests in every VS Code window and restarts extension hosts.</Description>
     <Categories>Other</Categories>
-    <Tags>codex switchboard reload</Tags>
+    <Tags>codex account switcher reload</Tags>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Code" />

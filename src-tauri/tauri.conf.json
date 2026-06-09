@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Codex Switchboard",
+  "productName": "Codex Account Switcher",
   "version": "0.1.0",
-  "identifier": "com.cuihongran.codex-switchboard",
+  "identifier": "com.cuihongran.codex-account-switcher",
   "build": {
     "beforeDevCommand": "npm run dev -- --host 0.0.0.0 --port 1420",
     "beforeBuildCommand": "npm run build",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Codex Switchboard",
+        "title": "Codex Account Switcher",
         "width": 980,
         "height": 640,
         "minWidth": 860,

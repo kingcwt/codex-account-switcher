@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability for the main Codex Switchboard window.",
+  "description": "Default capability for the main Codex Account Switcher window.",
   "windows": ["main"],
   "permissions": [
     "core:default",

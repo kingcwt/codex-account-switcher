@@ -12,9 +12,9 @@ use tauri::{
 };
 use tauri_plugin_positioner::{Position, WindowExt};
 
-const STATE_UPDATED_EVENT: &str = "switchboard://state-updated";
-const TRAY_ID: &str = "codex-switchboard";
-const TRAY_ITEM_OPEN_WINDOW: &str = "open-switchboard-window";
+const STATE_UPDATED_EVENT: &str = "account-switcher://state-updated";
+const TRAY_ID: &str = "codex-account-switcher";
+const TRAY_ITEM_OPEN_WINDOW: &str = "open-account-switcher-window";
 const TRAY_ITEM_QUIT: &str = "quit";
 const TRAY_ITEM_EMPTY: &str = "empty-profiles";
 
@@ -121,28 +121,29 @@ fn codex_home_dir() -> Result<PathBuf, String> {
     Ok(home_dir()?.join(".codex"))
 }
 
-fn switchboard_home_dir() -> Result<PathBuf, String> {
+fn account_switcher_home_dir() -> Result<PathBuf, String> {
+    // 保留旧数据目录，避免应用改名后现有 Profile 和备份不可见。
     Ok(home_dir()?.join(".codex-switchboard"))
 }
 
 fn profiles_dir() -> Result<PathBuf, String> {
-    Ok(switchboard_home_dir()?.join("profiles"))
+    Ok(account_switcher_home_dir()?.join("profiles"))
 }
 
 fn active_profile_file() -> Result<PathBuf, String> {
-    Ok(switchboard_home_dir()?.join("active-profile.json"))
+    Ok(account_switcher_home_dir()?.join("active-profile.json"))
 }
 
 fn vscode_refresh_signal_file() -> Result<PathBuf, String> {
     // 每个 VS Code 窗口里的 bridge 都监听同一个信号文件，用一次写入广播扩展宿主刷新请求。
-    Ok(switchboard_home_dir()?.join("vscode-refresh.signal"))
+    Ok(account_switcher_home_dir()?.join("vscode-refresh.signal"))
 }
 
 fn backup_dir() -> Result<PathBuf, String> {
-    Ok(switchboard_home_dir()?.join("backup").join("last-known-good"))
+    Ok(account_switcher_home_dir()?.join("backup").join("last-known-good"))
 }
 
-fn ensure_switchboard_dirs() -> Result<(), String> {
+fn ensure_account_switcher_dirs() -> Result<(), String> {
     let profiles = profiles_dir()?;
     let backup = backup_dir()?;
 
@@ -251,7 +252,7 @@ fn read_profile_summary(path: &Path) -> Result<ProfileSummary, String> {
 }
 
 fn load_profiles() -> Result<Vec<ProfileSummary>, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let mut profiles = Vec::new();
     let entries = fs::read_dir(profiles_dir()?).map_err(|error| format!("无法读取 profiles 目录: {}", error))?;
@@ -369,7 +370,7 @@ fn write_snapshot_to_codex(profile_id: &str) -> Result<(), String> {
 
 fn proxy_config_from_payload(payload: &CreateProxyPayload) -> String {
     format!(
-        "# 由 Codex Switchboard 生成的代理 Profile。\ncli_auth_credentials_store = \"file\"\nmodel_provider = \"{provider_name}\"\n\n[model_providers.{provider_name}]\nname = \"{provider_name}\"\nbase_url = \"{base_url}\"\nwire_api = \"responses\"\nrequires_openai_auth = true\n\nmodel = \"{model}\"\nmodel_reasoning_effort = \"{reasoning_effort}\"\npersonality = \"{personality}\"\nservice_tier = \"{service_tier}\"\n",
+        "# 由 Codex Account Switcher 生成的代理 Profile。\ncli_auth_credentials_store = \"file\"\nmodel_provider = \"{provider_name}\"\n\n[model_providers.{provider_name}]\nname = \"{provider_name}\"\nbase_url = \"{base_url}\"\nwire_api = \"responses\"\nrequires_openai_auth = true\n\nmodel = \"{model}\"\nmodel_reasoning_effort = \"{reasoning_effort}\"\npersonality = \"{personality}\"\nservice_tier = \"{service_tier}\"\n",
         provider_name = payload.provider_name.trim(),
         base_url = payload.base_url.trim(),
         model = payload.model.trim(),
@@ -510,7 +511,7 @@ fn refresh_tray_menu(app: &AppHandle) -> Result<(), tauri::Error> {
 }
 
 fn activate_profile(profile_id: &str) -> Result<ActionResult, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let target_meta_path = profile_meta_path(profile_id)?;
     if !target_meta_path.exists() {
@@ -559,7 +560,7 @@ fn load_state() -> Result<AppStatePayload, String> {
 
 #[tauri::command]
 fn import_current_profile(app: AppHandle, payload: ImportCurrentPayload) -> Result<ActionResult, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let name = payload.name.trim();
     if name.is_empty() {
@@ -596,7 +597,7 @@ fn import_current_profile(app: AppHandle, payload: ImportCurrentPayload) -> Resu
 
 #[tauri::command]
 fn create_proxy_profile(app: AppHandle, payload: CreateProxyPayload) -> Result<ActionResult, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let name = payload.name.trim();
     if name.is_empty() {
@@ -662,7 +663,7 @@ fn switch_profile(app: AppHandle, profile_id: String) -> Result<ActionResult, St
 
 #[tauri::command]
 fn resync_active_profile(app: AppHandle, profile_id: String) -> Result<ActionResult, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let active_profile_id = read_active_profile_id()?
         .ok_or_else(|| "当前没有激活的 Profile，无法重新同步".to_string())?;
@@ -685,7 +686,7 @@ fn resync_active_profile(app: AppHandle, profile_id: String) -> Result<ActionRes
 
 #[tauri::command]
 fn update_profile(app: AppHandle, payload: UpdateProfilePayload) -> Result<ActionResult, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let mut summary = read_profile_summary(&profile_meta_path(&payload.profile_id)?)?;
     let name = payload.name.trim();
@@ -713,7 +714,7 @@ fn update_profile(app: AppHandle, payload: UpdateProfilePayload) -> Result<Actio
 
 #[tauri::command]
 fn delete_profile(app: AppHandle, payload: DeleteProfilePayload) -> Result<ActionResult, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let meta_path = profile_meta_path(&payload.profile_id)?;
     let summary = read_profile_summary(&meta_path)?;
@@ -740,7 +741,7 @@ fn delete_profile(app: AppHandle, payload: DeleteProfilePayload) -> Result<Actio
 
 #[tauri::command]
 fn sync_desktop_clients(app: AppHandle) -> Result<ActionResult, String> {
-    ensure_switchboard_dirs()?;
+    ensure_account_switcher_dirs()?;
 
     let desktop_sync = sync_desktop_apps();
     let result = ActionResult {
@@ -812,7 +813,7 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
-            ensure_switchboard_dirs()
+            ensure_account_switcher_dirs()
                 .map_err(|error| -> Box<dyn std::error::Error> { error.into() })?;
 
             build_tray(&app.handle())?;
