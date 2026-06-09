@@ -24,7 +24,8 @@
 html,
 body,
 #root {
-  min-height: 100svh;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -68,15 +69,11 @@ textarea {
   min-height: 88px;
 }
 
-#root {
-  min-height: 100svh;
-}
-
 .app-shell {
-  /* 内容区直接贴合原生窗口，不再额外包一层仿 macOS 的假外壳。 */
+  /* 应用始终贴合原生窗口高度，滚动职责只交给账号列表。 */
   display: flex;
   flex-direction: column;
-  min-height: 100svh;
+  height: 100%;
   background: rgba(248, 249, 251, 0.96);
   overflow: hidden;
 }
@@ -95,8 +92,11 @@ textarea {
 }
 
 .app-main {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
-  overflow: auto;
+  min-height: 0;
+  overflow: hidden;
   padding: 0 14px 14px;
 }
 
@@ -346,19 +346,25 @@ textarea {
 .workspace-grid {
   display: grid;
   grid-template-columns: 292px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-height: 0;
   gap: 10px;
   margin-top: 8px;
 }
 
 .sidebar-panel,
 .detail-panel {
-  min-height: 560px;
+  min-height: 0;
   border-radius: 12px;
   border: 1px solid #e3e7ed;
   background: #fbfbfc;
 }
 
 .sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 12px;
 }
 
@@ -388,7 +394,13 @@ textarea {
 
 .profile-list {
   display: grid;
+  grid-auto-rows: max-content;
+  flex: 1 1 auto;
+  min-height: 0;
   gap: 7px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 3px;
 }
 
 .profile-card {
@@ -649,7 +661,7 @@ textarea {
 
   .sidebar-panel,
   .detail-panel {
-    min-height: auto;
+    min-height: 0;
   }
 }
 
