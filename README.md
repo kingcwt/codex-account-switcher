@@ -1,8 +1,6 @@
-# Codex Account Switcher
+# codex-account-switcher
 
 一个面向 macOS 的 Codex 账号切换器。它会把当前 Codex 配置保存为本地 Profile，并在切换账号时同步更新 Codex App、Codex CLI 和 VS Code 中的 Codex 插件。
-
-> 项目内部名称仍为 **Codex Switchboard**，GitHub 仓库名建议使用 `codex-account-switcher`。
 
 ## 功能
 
@@ -65,7 +63,7 @@ cargo check --manifest-path src-tauri/Cargo.toml
 
 ## 安装 VS Code Bridge
 
-Codex Account Switcher 切换账号后会更新 `~/.codex-switchboard/vscode-refresh.signal`。Bridge 扩展在每个 VS Code 窗口中监听该文件，并重启对应的扩展宿主，让 Codex 插件重新读取账号，同时保留当前窗口。
+`codex-account-switcher` 切换账号后会更新 `~/.codex-switchboard/vscode-refresh.signal`。Bridge 扩展在每个 VS Code 窗口中监听该文件，并重启对应的扩展宿主，让 Codex 插件重新读取账号，同时保留当前窗口。
 
 ```bash
 mkdir -p /private/tmp/codex-switchboard-bridge-vsix/extension
