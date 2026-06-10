@@ -27,7 +27,10 @@ if (!repository) {
   throw new Error('Missing repository. Pass --repository or set GITHUB_REPOSITORY.');
 }
 
-// GitHub release asset 下载地址可由仓库、tag 和文件名稳定推导，避免依赖上传后的 API 再查询。
+// softprops/action-gh-release 会把资产文件名里的空格规范化为点号，manifest 需要写上传后的名字。
+const toUploadedAssetName = (assetName) => assetName.replaceAll(' ', '.');
+
+// GitHub release asset 下载地址可由仓库、tag 和上传后的文件名稳定推导，避免依赖上传后的 API 再查询。
 const toReleaseDownloadUrl = (assetName) => {
   const encodedName = assetName.split('/').map(encodeURIComponent).join('/');
   return `https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}/${encodedName}`;
@@ -40,7 +43,7 @@ if (!signatureFile) {
   throw new Error(`No updater signature found in ${macosBundleDir}`);
 }
 
-const updaterAssetName = signatureFile.replace(/\.sig$/, '');
+const updaterAssetName = toUploadedAssetName(signatureFile.replace(/\.sig$/, ''));
 const signature = fs.readFileSync(path.join(macosBundleDir, signatureFile), 'utf8').trim();
 const payload = {
   signature,
