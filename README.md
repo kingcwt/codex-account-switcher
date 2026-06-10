@@ -95,9 +95,18 @@ GitHub Actions 会构建 macOS 安装包并上传到当前仓库的 Release。�
 
 ### macOS 下载安全校验
 
-GitHub Actions 当前使用 `APPLE_SIGNING_IDENTITY="-"` 做 ad-hoc 代码签名，避免 Apple Silicon 上从浏览器下载后被系统直接判定为“已损坏，无法打开”。这不是 Apple Developer ID 公证签名，首次打开时仍可能需要用户在系统设置中允许。
+macOS 从浏览器下载的 `.dmg` 必须经过 Apple Developer ID 代码签名和 Apple Notary 公证，否则 Gatekeeper 会提示无法验证开发者身份，甚至要求移动到废纸篓。ad-hoc 签名只能满足二进制完整性要求，不能让公开下载包被 macOS 信任。
 
-如果后续要让 macOS 完整信任安装包，需要接入 Apple Developer ID 证书和 Apple Notary 公证。届时应把证书、证书密码、Apple ID、App 专用密码和 Team ID 放入 GitHub Secrets，并把 release workflow 从 ad-hoc 签名切换为 Developer ID 签名与公证。
+发布前需要在 GitHub Actions Secrets 中配置：
+
+- `APPLE_CERTIFICATE`：Developer ID Application 证书导出的 `.p12` 文件，base64 后的内容
+- `APPLE_CERTIFICATE_PASSWORD`：导出 `.p12` 时设置的密码
+- `KEYCHAIN_PASSWORD`：CI 临时 keychain 密码，可自行生成一段随机字符串
+- `APPLE_ID`：Apple Developer 账号
+- `APPLE_PASSWORD`：Apple ID 的 app-specific password
+- `APPLE_TEAM_ID`：Apple Developer Team ID
+
+Release workflow 会导入 Developer ID 证书、执行代码签名，并把 Apple 账号信息交给 Tauri 做 notarization。缺少这些 Secrets 时 workflow 会直接失败，避免发布用户打不开的安装包。
 
 ## 安装 VS Code Bridge
 
