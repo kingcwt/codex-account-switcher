@@ -95,18 +95,9 @@ GitHub Actions 会构建 macOS 安装包并上传到当前仓库的 Release。�
 
 ### macOS 下载安全校验
 
-macOS 从浏览器下载的 `.dmg` 必须经过 Apple Developer ID 代码签名和 Apple Notary 公证，否则 Gatekeeper 会提示无法验证开发者身份，甚至要求移动到废纸篓。ad-hoc 签名只能满足二进制完整性要求，不能让公开下载包被 macOS 信任。
+当前 Release workflow 采用已验证项目的兼容方案：先让 Tauri 生成原始产物，再清理 app bundle 扩展属性、执行 ad-hoc 签名、重做 DMG，并用重签后的 app 重新生成 updater 压缩包和签名。
 
-发布前需要在 GitHub Actions Secrets 中配置：
-
-- `APPLE_CERTIFICATE`：Developer ID Application 证书导出的 `.p12` 文件，base64 后的内容
-- `APPLE_CERTIFICATE_PASSWORD`：导出 `.p12` 时设置的密码
-- `KEYCHAIN_PASSWORD`：CI 临时 keychain 密码，可自行生成一段随机字符串
-- `APPLE_ID`：Apple Developer 账号
-- `APPLE_PASSWORD`：Apple ID 的 app-specific password
-- `APPLE_TEAM_ID`：Apple Developer Team ID
-
-Release workflow 会导入 Developer ID 证书、执行代码签名，并把 Apple 账号信息交给 Tauri 做 notarization。缺少这些 Secrets 时 workflow 会直接失败，避免发布用户打不开的安装包。
+这条链路不需要 Apple Developer ID Secrets，只依赖上面的 Tauri updater 三个 Secrets。严格面向公网分发时，Apple 官方推荐的完整方案仍然是 Developer ID 签名 + Notary 公证；如果后续申请到 Apple Developer 账号，再把 workflow 切回公证链路即可。
 
 ## 安装 VS Code Bridge
 

@@ -13,6 +13,9 @@ dist-ssr
 .env
 # Rust/Tauri build output is local-only and can be several gigabytes.
 src-tauri/target/
+# Release workflow regenerates these artifacts, so local verification output should stay untracked.
+desktop-packages/
+latest.json
 *.local
 
 # Editor directories and files
