@@ -63,6 +63,36 @@ npm run build
 cargo check --manifest-path src-tauri/Cargo.toml
 ```
 
+## 发布与自动更新
+
+当前仓库可直接承载源码开发、安装包发布和应用内更新：
+
+- `dev`：日常源码开发分支
+- `main`：项目介绍、下载入口和稳定说明
+- `v*` tag：触发 GitHub Actions 自动构建并发布安装包
+- GitHub Releases：存放 `.dmg`、`.app.tar.gz`、签名和 `latest.json`
+
+首次发版前需要生成 Tauri updater 签名密钥，并把密钥写入仓库 Secrets。私钥只放 Secrets，不提交到仓库。
+
+```bash
+npm run tauri -- signer generate -w ~/.tauri/codex-account-switcher.key
+```
+
+在 GitHub 仓库的 `Settings -> Secrets and variables -> Actions` 中配置：
+
+- `TAURI_UPDATER_PRIVATE_KEY`：生成的私钥内容
+- `TAURI_UPDATER_PRIVATE_KEY_PASSWORD`：生成密钥时设置的密码；如果未设置密码则留空
+- `TAURI_UPDATER_PUBKEY`：生成命令输出的公钥
+
+发版时更新 `src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` 中的版本号后推送 tag：
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+GitHub Actions 会构建 macOS 安装包并上传到当前仓库的 Release。应用内“检查更新”会读取当前仓库最新 Release 的 `latest.json`，校验签名后安装更新，重启应用后生效。
+
 ## 安装 VS Code Bridge
 
 `codex-account-switcher` 切换账号后会更新 `~/.codex-switchboard/vscode-refresh.signal`。Bridge 扩展在每个 VS Code 窗口中监听该文件，并重启对应的扩展宿主，让 Codex 插件重新读取账号，同时保留当前窗口。

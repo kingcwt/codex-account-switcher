@@ -6,7 +6,8 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // Tauri 打包会生成 Rust 与 codegen 产物，前端 lint 只检查源码目录。
+  globalIgnores(['dist', 'src-tauri/target']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

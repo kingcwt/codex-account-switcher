@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.env
 # Rust/Tauri build output is local-only and can be several gigabytes.
 src-tauri/target/
 *.local

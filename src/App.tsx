@@ -20,6 +20,7 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import {
 	type ActionResult,
 	type AppStatePayload,
+	checkAppUpdate,
 	deleteProfile,
 	importCurrentProfile,
 	isTauriRuntime,
@@ -36,12 +37,27 @@ const EMPTY_PROFILES: AppStatePayload["profiles"] = [];
 const WINDOW_DRAG_BLOCK_SELECTOR =
 	'button, a, input, textarea, select, label, summary, [role="button"], [contenteditable="true"], [data-no-window-drag]';
 
+const padDatePart = (value: number) => String(value).padStart(2, "0");
+
+const formatProfileTimestamp = (timestamp: string) => {
+	const date = new Date(timestamp);
+
+	if (Number.isNaN(date.getTime())) {
+		// 历史 Profile 可能存在非标准时间字符串，解析失败时保留原值避免误导用户。
+		return timestamp;
+	}
+
+	// 后端保存 UTC ISO 字符串，列表展示时按用户本机时区转成固定可读格式。
+	return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())} ${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}:${padDatePart(date.getSeconds())}`;
+};
+
 function App() {
 	const [appState, setAppState] = useState<AppStatePayload | null>(null);
 	const [showComposer, setShowComposer] = useState(false);
 	const [mode, setMode] = useState<ComposerMode>("current");
 	const [profileName, setProfileName] = useState("");
 	const [profileNotes, setProfileNotes] = useState("");
+	const [successTitle, setSuccessTitle] = useState("同步成功");
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [desktopSync, setDesktopSync] =
@@ -134,6 +150,7 @@ function App() {
 	const applyActionResult = (result: ActionResult) => {
 		// 所有本地文件变更都以后端结果为准，避免前端自己拼状态。
 		setAppState(result.state);
+		setSuccessTitle("同步成功");
 		setSuccessMessage(result.message);
 		setErrorMessage(null);
 		setDesktopSync(result.desktop_sync);
@@ -269,6 +286,25 @@ function App() {
 		}
 	};
 
+	const handleCheckAppUpdate = async () => {
+		setIsSubmitting(true);
+		setErrorMessage(null);
+
+		try {
+			const result = await checkAppUpdate();
+			// 更新安装会替换应用包，业务状态不应被前端顺手改动。
+			setSuccessTitle("更新检查完成");
+			setSuccessMessage(result.message);
+			setDesktopSync(null);
+		} catch (error) {
+			setErrorMessage(
+				error instanceof Error ? error.message : "检查应用更新失败"
+			);
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
 	const handleWindowDragStart = (event: MouseEvent<HTMLElement>) => {
 		// 普通内容区按住即可拖动窗口，但保留按钮和输入类控件的原始交互。
 		if (event.button !== 0 || !isTauriRuntime()) return;
@@ -339,6 +375,15 @@ function App() {
 							<button
 								type="button"
 								className="ghost-button"
+								onClick={() => void handleCheckAppUpdate()}
+								disabled={isSubmitting}
+							>
+								<RotateCcw size={13} />
+								检查更新
+							</button>
+							<button
+								type="button"
+								className="ghost-button"
 								onClick={() => openComposer("current")}
 							>
 								<Import size={14} />
@@ -368,7 +413,7 @@ function App() {
 								<strong>
 									{desktopSyncFailed
 										? "同步已写入，刷新失败"
-										: "同步成功"}
+										: successTitle}
 								</strong>
 								<p>{successMessage}</p>
 							</div>
@@ -497,7 +542,9 @@ function App() {
 														: "工作代理"}
 												</span>
 												<span>
-													{profile.last_synced_at}
+													{formatProfileTimestamp(
+														profile.last_synced_at
+													)}
 												</span>
 											</div>
 

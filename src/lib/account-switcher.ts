@@ -30,6 +30,13 @@ export type DesktopSyncStatus = {
   notes: string[]
 }
 
+export type AppUpdateStatus = {
+  status: 'up_to_date' | 'installed'
+  message: string
+  current_version: string
+  next_version: string | null
+}
+
 export type ImportCurrentPayload = {
   name: string
   notes: string
@@ -125,4 +132,10 @@ export const deleteProfile = async (profileId: string) => {
 export const syncDesktopClients = async () => {
   ensureTauri()
   return invoke<ActionResult>('sync_desktop_clients')
+}
+
+export const checkAppUpdate = async () => {
+  ensureTauri()
+  // 更新包由后端 updater 插件校验签名并安装，前端只负责触发和展示结果。
+  return invoke<AppUpdateStatus>('check_app_update')
 }

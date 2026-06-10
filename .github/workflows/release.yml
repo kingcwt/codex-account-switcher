@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: Build macOS release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Inject updater public key
+        env:
+          TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
+        run: node -e "const fs=require('fs'); const path='src-tauri/tauri.conf.json'; const key=process.env.TAURI_UPDATER_PUBKEY; if(!key) throw new Error('Missing TAURI_UPDATER_PUBKEY secret'); fs.writeFileSync(path, fs.readFileSync(path, 'utf8').replace('__TAURI_UPDATER_PUBKEY__', key));"
+
+      - name: Build and publish Tauri release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Codex Account Switcher ${{ github.ref_name }}
+          releaseBody: |
+            macOS installation packages and updater metadata are attached below.
+
+            The app checks this release's latest.json for signed updates.
+          uploadUpdaterJson: true
+          releaseDraft: false
+          prerelease: false

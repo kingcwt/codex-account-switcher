@@ -30,7 +30,17 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
+    "targets": ["app", "dmg"],
+    "createUpdaterArtifacts": true,
     "icon": ["icons/tray.png"]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/kingcwt/codex-account-switcher/releases/latest/download/latest.json"
+      ],
+      "pubkey": "__TAURI_UPDATER_PUBKEY__"
+    }
   }
 }

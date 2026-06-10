@@ -11,6 +11,7 @@ use tauri::{
     AppHandle, Emitter, Manager,
 };
 use tauri_plugin_positioner::{Position, WindowExt};
+use tauri_plugin_updater::UpdaterExt;
 
 const STATE_UPDATED_EVENT: &str = "account-switcher://state-updated";
 const TRAY_ID: &str = "codex-account-switcher";
@@ -86,6 +87,14 @@ struct DesktopSyncStatus {
     codex_relaunched: bool,
     vscode_reloaded: bool,
     notes: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct AppUpdateStatus {
+    status: String,
+    message: String,
+    current_version: String,
+    next_version: Option<String>,
 }
 
 #[cfg(unix)]
@@ -753,6 +762,42 @@ fn sync_desktop_clients(app: AppHandle) -> Result<ActionResult, String> {
     Ok(result)
 }
 
+#[tauri::command]
+async fn check_app_update(app: AppHandle) -> Result<AppUpdateStatus, String> {
+    // 更新包由 GitHub Release 托管并通过 Tauri 签名校验，前端只触发流程不接触下载地址。
+    let updater = app
+        .updater()
+        .map_err(|error| format!("无法初始化更新检查: {}", error))?;
+
+    let update = updater
+        .check()
+        .await
+        .map_err(|error| format!("检查更新失败: {}", error))?;
+
+    let Some(update) = update else {
+        return Ok(AppUpdateStatus {
+            status: "up_to_date".to_string(),
+            message: "当前已是最新版本。".to_string(),
+            current_version: app.package_info().version.to_string(),
+            next_version: None,
+        });
+    };
+
+    let current_version = update.current_version.clone();
+    let next_version = update.version.clone();
+    update
+        .download_and_install(|_, _| {}, || {})
+        .await
+        .map_err(|error| format!("下载或安装更新失败: {}", error))?;
+
+    Ok(AppUpdateStatus {
+        status: "installed".to_string(),
+        message: format!("已安装 {}，重启应用后生效。", next_version),
+        current_version,
+        next_version: Some(next_version),
+    })
+}
+
 fn toggle_main_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         if matches!(window.is_visible(), Ok(true)) {
@@ -812,6 +857,7 @@ pub fn run() {
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             ensure_account_switcher_dirs()
                 .map_err(|error| -> Box<dyn std::error::Error> { error.into() })?;
@@ -827,7 +873,8 @@ pub fn run() {
             resync_active_profile,
             update_profile,
             delete_profile,
-            sync_desktop_clients
+            sync_desktop_clients,
+            check_app_update
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
