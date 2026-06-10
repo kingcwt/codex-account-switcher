@@ -16,6 +16,7 @@ src-tauri/target/
 # Release workflow regenerates these artifacts, so local verification output should stay untracked.
 desktop-packages/
 latest.json
+install-macos.sh
 *.local
 
 # Editor directories and files

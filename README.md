@@ -95,18 +95,15 @@ GitHub Actions 会构建 macOS 安装包并上传到当前仓库的 Release。�
 
 ### macOS 下载安全校验
 
-公网下载的 macOS `.dmg` 需要 Apple Developer ID 签名和 Notary 公证，否则 Gatekeeper 会提示无法验证应用是否安全，并阻止双击打开。ad-hoc 签名只能用于本地或受控环境，不能让浏览器下载的公开安装包通过 Gatekeeper。
+当前 macOS Release 采用参考项目的兼容链路：Tauri 生成原始产物后，脚本会清理 app bundle 扩展属性、执行 ad-hoc 重签、重做 DMG，并用重签后的 app 重新生成 updater 压缩包和签名。
 
-发布前还需要在 GitHub Actions Secrets 中配置：
+Chrome/Safari 直接下载未公证 DMG 时，macOS 仍可能给文件写入 `com.apple.quarantine` 并触发 Gatekeeper 拦截。Release 会额外上传 `install-macos.sh`，通过命令行下载、安装并清理隔离属性：
 
-- `APPLE_CERTIFICATE`：Developer ID Application 证书导出的 `.p12` 文件，base64 后的内容
-- `APPLE_CERTIFICATE_PASSWORD`：导出 `.p12` 时设置的密码
-- `KEYCHAIN_PASSWORD`：CI 临时 keychain 密码，可自行生成一段随机字符串
-- `APPLE_ID`：Apple Developer 账号
-- `APPLE_PASSWORD`：Apple ID 的 app-specific password
-- `APPLE_TEAM_ID`：Apple Developer Team ID
+```bash
+curl -fsSL https://github.com/kingcwt/codex-account-switcher/releases/latest/download/install-macos.sh | bash
+```
 
-Release workflow 会在缺少这些 Secrets 时直接失败，避免继续发布用户无法正常安装的 macOS 包。
+安装完成后，应用内自动更新继续使用 Tauri updater 的签名校验。
 
 ## 安装 VS Code Bridge
 

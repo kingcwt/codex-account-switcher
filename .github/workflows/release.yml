@@ -37,65 +37,43 @@ jobs:
       - name: Prefer system xattr
         run: echo "/usr/bin" >> "$GITHUB_PATH"
 
-      # 公网下载的 macOS app 必须使用 Developer ID 证书签名，ad-hoc 签名无法通过 Gatekeeper。
-      - name: Import Apple Developer ID certificate
+      # 先让 Tauri 生成原始 app/dmg/updater 产物，后面再按参考项目方式重签和重打包。
+      - name: Build unsigned Tauri bundles
         env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          test -n "$APPLE_CERTIFICATE" || { echo "Missing APPLE_CERTIFICATE secret"; exit 1; }
-          test -n "$APPLE_CERTIFICATE_PASSWORD" || { echo "Missing APPLE_CERTIFICATE_PASSWORD secret"; exit 1; }
-          test -n "$KEYCHAIN_PASSWORD" || { echo "Missing KEYCHAIN_PASSWORD secret"; exit 1; }
-
-          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security set-keychain-settings -t 3600 -u build.keychain
-          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          security find-identity -v -p codesigning build.keychain
-
-      # Tauri notarization 需要明确传入 Developer ID Application 证书名称。
-      - name: Resolve Developer ID identity
-        run: |
-          CERT_INFO=$(security find-identity -v -p codesigning build.keychain | grep "Developer ID Application" | head -n 1 || true)
-          test -n "$CERT_INFO" || { echo "Missing Developer ID Application identity in imported certificate"; exit 1; }
-          CERT_ID=$(echo "$CERT_INFO" | awk -F'"' '{print $2}')
-          echo "APPLE_SIGNING_IDENTITY=$CERT_ID" >> "$GITHUB_ENV"
-
-      # 缺少 Apple notarization 凭据时直接失败，避免继续发布用户打不开的安装包。
-      - name: Validate Apple notarization secrets
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          test -n "$APPLE_ID" || { echo "Missing APPLE_ID secret"; exit 1; }
-          test -n "$APPLE_PASSWORD" || { echo "Missing APPLE_PASSWORD secret"; exit 1; }
-          test -n "$APPLE_TEAM_ID" || { echo "Missing APPLE_TEAM_ID secret"; exit 1; }
-
-      # 由 Tauri 统一完成签名、公证、Release 资产上传和 updater manifest 生成。
-      - name: Build notarized Tauri release
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ env.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY_PASSWORD }}
+        run: npm run tauri -- build --bundles app,dmg --no-sign
+
+      # 清理 bundle 扩展属性、ad-hoc 重签 app，并用签好的 app 重做 DMG/updater 压缩包。
+      - name: Re-sign macOS app and rebuild packages
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY_PASSWORD }}
+        run: node scripts/sign-and-package-mac.mjs aarch64
+
+      # latest.json 必须使用重签后的 updater 包签名，否则应用内更新校验会失败。
+      - name: Generate updater manifest
+        run: node scripts/generate-updater-manifest.mjs --tag "${{ github.ref_name }}" --repository "${{ github.repository }}" --arch aarch64 --output latest.json
+
+      # 无 Apple Developer ID 时，浏览器下载会加 quarantine；安装脚本用命令行下载并清理隔离属性。
+      - name: Generate macOS install script
+        run: node scripts/generate-macos-install-script.mjs --tag "${{ github.ref_name }}" --repository "${{ github.repository }}" --arch aarch64 --output install-macos.sh
+
+      # 发布 DMG、updater 包、签名、manifest 和命令行安装脚本。
+      - name: Publish GitHub Release assets
+        uses: softprops/action-gh-release@v2
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: Codex Account Switcher ${{ github.ref_name }}
-          releaseBody: |
+          name: Codex Account Switcher ${{ github.ref_name }}
+          body: |
             macOS installation packages and updater metadata are attached below.
 
-            The app checks this release's latest.json for signed updates.
-          includeUpdaterJson: true
-          releaseDraft: false
+            If Chrome blocks the downloaded DMG, install with:
+            curl -fsSL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/install-macos.sh | bash
+          draft: false
           prerelease: false
+          files: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/macos/*.app.tar.gz
+            src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
+            latest.json
+            install-macos.sh
