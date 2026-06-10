@@ -47,6 +47,6 @@ jobs:
             macOS installation packages and updater metadata are attached below.
 
             The app checks this release's latest.json for signed updates.
-          uploadUpdaterJson: true
+          includeUpdaterJson: true
           releaseDraft: false
           prerelease: false
