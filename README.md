@@ -93,6 +93,12 @@ git push origin v0.1.0
 
 GitHub Actions 会构建 macOS 安装包并上传到当前仓库的 Release。应用内“检查更新”会读取当前仓库最新 Release 的 `latest.json`，校验签名后安装更新，重启应用后生效。
 
+### macOS 下载安全校验
+
+GitHub Actions 当前使用 `APPLE_SIGNING_IDENTITY="-"` 做 ad-hoc 代码签名，避免 Apple Silicon 上从浏览器下载后被系统直接判定为“已损坏，无法打开”。这不是 Apple Developer ID 公证签名，首次打开时仍可能需要用户在系统设置中允许。
+
+如果后续要让 macOS 完整信任安装包，需要接入 Apple Developer ID 证书和 Apple Notary 公证。届时应把证书、证书密码、Apple ID、App 专用密码和 Team ID 放入 GitHub Secrets，并把 release workflow 从 ad-hoc 签名切换为 Developer ID 签名与公证。
+
 ## 安装 VS Code Bridge
 
 `codex-account-switcher` 切换账号后会更新 `~/.codex-switchboard/vscode-refresh.signal`。Bridge 扩展在每个 VS Code 窗口中监听该文件，并重启对应的扩展宿主，让 Codex 插件重新读取账号，同时保留当前窗口。

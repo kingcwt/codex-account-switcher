@@ -34,10 +34,15 @@ jobs:
           TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
         run: node -e "const fs=require('fs'); const path='src-tauri/tauri.conf.json'; const key=process.env.TAURI_UPDATER_PUBKEY; if(!key) throw new Error('Missing TAURI_UPDATER_PUBKEY secret'); fs.writeFileSync(path, fs.readFileSync(path, 'utf8').replace('__TAURI_UPDATER_PUBKEY__', key));"
 
+      - name: Prefer system xattr
+        run: echo "/usr/bin" >> "$GITHUB_PATH"
+
       - name: Build and publish Tauri release
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # macOS 从浏览器下载的应用需要代码签名；没有 Developer ID 时先使用 Tauri 官方支持的 ad-hoc 签名。
+          APPLE_SIGNING_IDENTITY: "-"
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_UPDATER_PRIVATE_KEY_PASSWORD }}
         with:
