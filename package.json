@@ -1,12 +1,13 @@
 {
   "name": "codex-account-switcher",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "desktop": "tauri dev",
     "build": "tsc -b && vite build",
+    "deploy": "node release.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "tauri": "tauri"

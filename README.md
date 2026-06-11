@@ -84,11 +84,16 @@ npm run tauri -- signer generate -w ~/.tauri/codex-account-switcher.key
 - `TAURI_UPDATER_PRIVATE_KEY_PASSWORD`：生成密钥时设置的密码；如果未设置密码则留空
 - `TAURI_UPDATER_PUBKEY`：生成命令输出的公钥
 
-发版时更新 `src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` 中的版本号后推送 tag：
+发版时使用根目录的发布脚本。脚本会读取远端已发布的 `v*` tag，不传版本时自动递增 patch 版本，并同步更新 `package.json`、`package-lock.json`、`src-tauri/tauri.conf.json`、`src-tauri/Cargo.toml` 和当前应用在 `src-tauri/Cargo.lock` 中的版本。完成本地检查后，脚本会提交版本变更、推送 `main`，再创建并推送 tag：
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+npm run deploy
+```
+
+也可以手动指定版本；指定版本必须大于远端已发布最高版本，且不能和已有 tag 重复：
+
+```bash
+npm run deploy -- 0.1.4
 ```
 
 GitHub Actions 会构建 macOS 应用产物并上传到当前仓库的 Release。应用内“检查更新”会读取当前仓库最新 Release 的 `latest.json`，校验签名后安装更新，重启应用后生效。
