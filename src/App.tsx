@@ -17,7 +17,7 @@ import {
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
-import appIconUrl from "../src-tauri/icons/128x128@2x.png";
+import appIconUrl from "../logo.png";
 import {
 	type ActionResult,
 	type AppUpdateStatus,

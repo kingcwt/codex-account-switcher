@@ -144,7 +144,6 @@ textarea {
   height: 74px;
   flex: 0 0 auto;
   border-radius: 20px;
-  filter: drop-shadow(0 12px 22px rgba(30, 74, 180, 0.16));
 }
 
 .toolbar-copy {
