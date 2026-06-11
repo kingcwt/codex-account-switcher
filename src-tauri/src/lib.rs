@@ -763,6 +763,35 @@ fn sync_desktop_clients(app: AppHandle) -> Result<ActionResult, String> {
 }
 
 #[tauri::command]
+async fn check_app_update_available(app: AppHandle) -> Result<AppUpdateStatus, String> {
+    // 启动时只探测 Release manifest，不下载也不安装，避免用户无感知替换应用。
+    let updater = app
+        .updater()
+        .map_err(|error| format!("无法初始化更新检查: {}", error))?;
+
+    let update = updater
+        .check()
+        .await
+        .map_err(|error| format!("检查更新失败: {}", error))?;
+
+    let Some(update) = update else {
+        return Ok(AppUpdateStatus {
+            status: "up_to_date".to_string(),
+            message: "当前已是最新版本。".to_string(),
+            current_version: app.package_info().version.to_string(),
+            next_version: None,
+        });
+    };
+
+    Ok(AppUpdateStatus {
+        status: "available".to_string(),
+        message: format!("发现新版本 {}。", update.version),
+        current_version: update.current_version,
+        next_version: Some(update.version),
+    })
+}
+
+#[tauri::command]
 async fn check_app_update(app: AppHandle) -> Result<AppUpdateStatus, String> {
     // 更新包由 GitHub Release 托管并通过 Tauri 签名校验，前端只触发流程不接触下载地址。
     let updater = app
@@ -874,6 +903,7 @@ pub fn run() {
             update_profile,
             delete_profile,
             sync_desktop_clients,
+            check_app_update_available,
             check_app_update
         ])
         .run(tauri::generate_context!())

@@ -20,8 +20,10 @@ import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import appIconUrl from "../src-tauri/icons/128x128@2x.png";
 import {
 	type ActionResult,
+	type AppUpdateStatus,
 	type AppStatePayload,
 	checkAppUpdate,
+	checkAppUpdateAvailable,
 	deleteProfile,
 	importCurrentProfile,
 	isTauriRuntime,
@@ -67,6 +69,7 @@ function App() {
 	const [successTitle, setSuccessTitle] = useState("同步成功");
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [appUpdate, setAppUpdate] = useState<AppUpdateStatus | null>(null);
 	const [desktopSync, setDesktopSync] =
 		useState<ActionResult["desktop_sync"]>(null);
 	const [editingProfileId, setEditingProfileId] = useState<string | null>(
@@ -87,6 +90,10 @@ function App() {
 	const desktopSyncFailed =
 		desktopSync != null &&
 		(!desktopSync.codex_relaunched || !desktopSync.vscode_reloaded);
+	const updateButtonLabel =
+		appUpdate?.status === "available" && appUpdate.next_version
+			? `更新到 ${appUpdate.next_version}`
+			: "检查更新";
 
 	useEffect(() => {
 		const bootstrap = async () => {
@@ -101,6 +108,14 @@ function App() {
 			try {
 				const state = await loadState();
 				setAppState(state);
+				try {
+					const updateStatus = await checkAppUpdateAvailable();
+					// 启动自动检查只改变按钮状态，不弹成功提示，避免打断账号切换工作流。
+					setAppUpdate(updateStatus.status === "available" ? updateStatus : null);
+				} catch (updateError) {
+					// 更新服务不可用不影响账号切换主流程，保留手动检查入口供用户重试。
+					console.warn("自动检查更新失败", updateError);
+				}
 			} catch (error) {
 				setErrorMessage(
 					error instanceof Error
@@ -302,6 +317,7 @@ function App() {
 			// 更新安装会替换应用包，业务状态不应被前端顺手改动。
 			setSuccessTitle("更新检查完成");
 			setSuccessMessage(result.message);
+			setAppUpdate(null);
 			setDesktopSync(null);
 		} catch (error) {
 			setErrorMessage(
@@ -388,12 +404,20 @@ function App() {
 							) : null}
 							<button
 								type="button"
-								className="ghost-button"
+								className={
+									appUpdate?.status === "available"
+										? "primary-button"
+										: "ghost-button"
+								}
 								onClick={() => void handleCheckAppUpdate()}
 								disabled={isSubmitting}
 							>
-								<RotateCcw size={13} />
-								检查更新
+								{appUpdate?.status === "available" ? (
+									<Download size={13} />
+								) : (
+									<RotateCcw size={13} />
+								)}
+								{updateButtonLabel}
 							</button>
 							<button
 								type="button"

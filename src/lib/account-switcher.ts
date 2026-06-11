@@ -31,7 +31,7 @@ export type DesktopSyncStatus = {
 }
 
 export type AppUpdateStatus = {
-  status: 'up_to_date' | 'installed'
+  status: 'up_to_date' | 'available' | 'installed'
   message: string
   current_version: string
   next_version: string | null
@@ -138,4 +138,10 @@ export const checkAppUpdate = async () => {
   ensureTauri()
   // 更新包由后端 updater 插件校验签名并安装，前端只负责触发和展示结果。
   return invoke<AppUpdateStatus>('check_app_update')
+}
+
+export const checkAppUpdateAvailable = async () => {
+  ensureTauri()
+  // 启动自动检查只读取 Release manifest，不下载也不安装。
+  return invoke<AppUpdateStatus>('check_app_update_available')
 }
