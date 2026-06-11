@@ -106,7 +106,7 @@ curl -fsSL https://github.com/kingcwt/codex-account-switcher/releases/latest/dow
 也可以用 Homebrew Cask 安装：
 
 ```bash
-brew tap kingcwt/codex-account-switcher
+brew tap kingcwt/codex-account-switcher https://github.com/kingcwt/codex-account-switcher
 brew install --cask codex-account-switcher
 ```
 
