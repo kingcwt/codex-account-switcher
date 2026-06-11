@@ -25,6 +25,7 @@ if (!repository) {
 
 const productName = tauriConfig.productName;
 const uploadedArchiveName = `${productName}.app.tar.gz`.replaceAll(' ', '.');
+const legacyArchiveName = `${productName}_aarch64.app.tar.gz`.replaceAll(' ', '.');
 
 const script = `#!/usr/bin/env bash
 set -euo pipefail
@@ -34,7 +35,9 @@ REPOSITORY="${repository}"
 DEFAULT_VERSION="${tag}"
 VERSION="\${VERSION:-$DEFAULT_VERSION}"
 ARCHIVE_NAME="${uploadedArchiveName}"
+LEGACY_ARCHIVE_NAME="${legacyArchiveName}"
 ARCHIVE_URL="https://github.com/\${REPOSITORY}/releases/download/\${VERSION}/\${ARCHIVE_NAME}"
+LEGACY_ARCHIVE_URL="https://github.com/\${REPOSITORY}/releases/download/\${VERSION}/\${LEGACY_ARCHIVE_NAME}"
 
 TMP_DIR="$(mktemp -d)"
 ARCHIVE_PATH="$TMP_DIR/$APP_NAME.app.tar.gz"
@@ -45,7 +48,11 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Downloading $APP_NAME $VERSION..."
-curl -fL "$ARCHIVE_URL" -o "$ARCHIVE_PATH"
+# v0.1.0/v0.1.1 使用过旧资产名；这里保留 fallback，方便用户安装历史版本。
+if ! curl -fL "$ARCHIVE_URL" -o "$ARCHIVE_PATH"; then
+  echo "Primary archive not found, trying legacy archive name..."
+  curl -fL "$LEGACY_ARCHIVE_URL" -o "$ARCHIVE_PATH"
+fi
 
 echo "Extracting app..."
 tar -xzf "$ARCHIVE_PATH" -C "$TMP_DIR"
