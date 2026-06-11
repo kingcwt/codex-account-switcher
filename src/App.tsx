@@ -17,6 +17,7 @@ import {
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import appIconUrl from "../src-tauri/icons/128x128@2x.png";
 import {
 	type ActionResult,
 	type AppStatePayload,
@@ -49,6 +50,12 @@ const formatProfileTimestamp = (timestamp: string) => {
 
 	// 后端保存 UTC ISO 字符串，列表展示时按用户本机时区转成固定可读格式。
 	return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())} ${padDatePart(date.getHours())}:${padDatePart(date.getMinutes())}:${padDatePart(date.getSeconds())}`;
+};
+
+const getProfileInitial = (name: string) => {
+	// 账号头像只作为列表视觉锚点，优先使用用户自定义名称的首字。
+	const initial = name.trim().slice(0, 1);
+	return initial || "C";
 };
 
 function App() {
@@ -326,7 +333,12 @@ function App() {
 			<header className="app-header">
 				<div className="toolbar">
 					<div className="toolbar-left">
-						<div className="app-mark">C</div>
+						<img
+							className="app-mark"
+							src={appIconUrl}
+							alt=""
+							aria-hidden="true"
+						/>
 						<div className="toolbar-copy">
 							<p className="eyebrow">Codex Account Switcher</p>
 							<div className="toolbar-title-row">
@@ -337,7 +349,9 @@ function App() {
 									</span>
 								) : null}
 							</div>
-							<p className="toolbar-subtitle">账号切换</p>
+							<p className="toolbar-subtitle">
+								像切换 App Store 账号一样切换 Codex 身份。
+							</p>
 						</div>
 					</div>
 
@@ -483,6 +497,7 @@ function App() {
 							</div>
 						</div>
 
+						{/* 账号列表采用 macOS 分组列表形态，避免工具型卡片堆叠造成视觉拥挤。 */}
 						{isLoading ? (
 							<div className="empty-state compact-empty">
 								<div className="empty-ornament">
@@ -515,52 +530,60 @@ function App() {
 											key={profile.id}
 											className={`profile-card ${isActive ? "profile-card-active" : ""}`}
 										>
-											<div className="profile-card-top">
-												<div className="profile-primary">
-													<div className="profile-name-row">
-														<strong>
-															{profile.name}
-														</strong>
-														{isActive ? (
-															<span className="active-chip">
-																当前
-															</span>
-														) : null}
-													</div>
-													<p>
-														{profile.notes ||
-															"未填写备注"}
-													</p>
-												</div>
+											<div
+												className="profile-avatar"
+												aria-hidden="true"
+											>
+												{getProfileInitial(profile.name)}
 											</div>
 
-											<div className="profile-meta-row">
-												<span>
-													{profile.profile_type ===
-													"chatgpt"
-														? "官方登录"
-														: "工作代理"}
-												</span>
-												<span>
-													{formatProfileTimestamp(
-														profile.last_synced_at
-													)}
-												</span>
-											</div>
+											<div className="profile-card-body">
+												<div className="profile-card-top">
+													<div className="profile-primary">
+														<div className="profile-name-row">
+															<strong>
+																{profile.name}
+															</strong>
+															{isActive ? (
+																<span className="active-chip">
+																	当前
+																</span>
+															) : null}
+														</div>
+														<p>
+															{profile.notes ||
+																"未填写备注"}
+														</p>
+													</div>
+												</div>
+
+												<div className="profile-meta-row">
+													<span>
+														{profile.profile_type ===
+														"chatgpt"
+															? "官方登录"
+															: "工作代理"}
+													</span>
+													<span>
+														{formatProfileTimestamp(
+															profile.last_synced_at
+														)}
+													</span>
+												</div>
 
 												<div className="profile-actions">
 													{!isActive ? (
 														<button
 															type="button"
 															className="mini-button"
-														onClick={() =>
-															void handleSwitchProfile(
-																profile.id
-															)
-														}
-														disabled={isSubmitting}
-													>
-														<Download size={14} />
+															onClick={() =>
+																void handleSwitchProfile(
+																	profile.id
+																)
+															}
+															disabled={isSubmitting}
+														>
+															<Download size={14} />
 															切换
 														</button>
 													) : (
@@ -596,40 +619,41 @@ function App() {
 														</>
 													)}
 
-												<button
-													type="button"
-													className="mini-button"
-													onClick={() =>
-														startEditingProfile(
-															profile.id
-														)
-													}
-													disabled={isSubmitting}
-												>
-													<PencilLine size={14} />
-													编辑
-												</button>
+													<button
+														type="button"
+														className="mini-button"
+														onClick={() =>
+															startEditingProfile(
+																profile.id
+															)
+														}
+														disabled={isSubmitting}
+													>
+														<PencilLine size={14} />
+														编辑
+													</button>
 
-												<button
-													type="button"
-													className="mini-button mini-button-danger"
-													onClick={() =>
-														void handleDeleteProfile(
-															profile.id,
-															profile.name
-														)
-													}
-													disabled={isSubmitting}
-												>
-													<Trash2 size={14} />
-													删除
-												</button>
+													<button
+														type="button"
+														className="mini-button mini-button-danger"
+														onClick={() =>
+															void handleDeleteProfile(
+																profile.id,
+																profile.name
+															)
+														}
+														disabled={isSubmitting}
+													>
+														<Trash2 size={14} />
+														删除
+													</button>
+												</div>
 											</div>
 										</div>
 									);
 								})}
 							</div>
-						)}
+							)}
 
 					</aside>
 				</section>

@@ -13,8 +13,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #eef0f4;
-  color: #1f2329;
+  background: #eef2f7;
+  color: #1d1d1f;
 }
 
 * {
@@ -45,13 +45,13 @@ button {
 
 input,
 textarea {
-  /* 导入弹层属于紧凑工具面板，输入内容和占位文案都要比普通页面再收一档。 */
+  /* 导入弹层使用系统表单密度，保持 macOS 工具窗口的轻量感。 */
   width: 100%;
-  border: 1px solid #d8dce3;
-  border-radius: 10px;
+  border: 1px solid rgba(60, 60, 67, 0.16);
+  border-radius: 12px;
   padding: 0.78rem 0.9rem;
-  background: #ffffff;
-  color: #1f2329;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1d1d1f;
   font-size: 0.9rem;
   line-height: 1.45;
   transition: border-color 160ms ease, box-shadow 160ms ease;
@@ -60,8 +60,8 @@ textarea {
 input:focus,
 textarea:focus {
   outline: none;
-  border-color: #7aa8ff;
-  box-shadow: 0 0 0 3px rgba(74, 132, 255, 0.14);
+  border-color: rgba(0, 122, 255, 0.52);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.14);
 }
 
 textarea {
@@ -70,147 +70,127 @@ textarea {
 }
 
 .app-shell {
-  /* 应用始终贴合原生窗口高度，滚动职责只交给账号列表。 */
+  /* 整个窗口模拟 App Store 的清透底色，内容滚动只发生在账号列表区域。 */
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: rgba(248, 249, 251, 0.96);
   overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(0, 122, 255, 0.16), transparent 28%),
+    radial-gradient(circle at 92% 18%, rgba(110, 64, 255, 0.11), transparent 26%),
+    linear-gradient(180deg, #f7f8fb 0%, #eef2f7 100%);
+}
+
+.app-shell::before {
+  /* 这层极淡高光让白色卡片不显脏，同时不破坏原生窗口克制感。 */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), transparent 42%);
+}
+
+.app-header,
+.app-main,
+.sheet-backdrop {
+  position: relative;
+  z-index: 1;
 }
 
 .app-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   flex: 0 0 auto;
-  padding: 8px 10px 6px;
-  background: rgba(248, 249, 251, 0.92);
-  backdrop-filter: blur(18px);
-  /* 窗口拖拽由 app-shell 统一处理，这里只避免标题栏文字被误选中。 */
+  padding: 22px 28px 14px 94px;
   cursor: default;
   user-select: none;
 }
 
 .app-main {
   display: flex;
-  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
-  padding: 0 10px 10px;
+  padding: 0 28px 28px;
 }
 
 .toolbar {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  /* 给 macOS 左上角原生三色按钮预留安全区，避免标题和按钮互相遮挡。 */
-  padding: 2px 0 6px 70px;
-  background: transparent;
-  border: 0;
-}
-
-.toolbar-drag-fill {
-  flex: 1 1 auto;
-  align-self: stretch;
-  min-width: 16px;
-}
-
-.toolbar-controls {
-  /* 路径和操作按钮作为同一组靠右排列，路径始终显示在按钮上方。 */
-  display: grid;
-  justify-items: end;
-  gap: 5px;
-  min-width: 0;
-}
-
-.header-paths {
-  display: grid;
-  gap: 2px;
-  max-width: min(420px, 42vw);
-}
-
-.header-path-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 5px;
-  min-width: 0;
-  color: #7b8594;
-  font-size: 0.68rem;
-}
-
-.header-path-row span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  align-items: flex-start;
+  gap: 18px;
+  min-height: 116px;
 }
 
 .toolbar-left,
 .toolbar-actions,
 .status-copy,
 .sync-pills,
+.profile-card,
+.profile-card-top,
+.profile-name-row,
+.profile-meta-row,
 .profile-actions,
-.active-summary-actions,
-.header-inline-action,
 .sheet-header {
   display: flex;
   align-items: center;
-  gap: 7px;
-  flex-wrap: wrap;
+}
+
+.toolbar-left {
+  min-width: 340px;
+  gap: 16px;
 }
 
 .app-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: #2459d6;
-  background: linear-gradient(180deg, #edf4ff, #dbe8ff);
-  border: 1px solid #d5e1fb;
+  width: 74px;
+  height: 74px;
+  flex: 0 0 auto;
+  border-radius: 20px;
+  filter: drop-shadow(0 12px 22px rgba(30, 74, 180, 0.16));
 }
 
 .toolbar-copy {
   min-width: 0;
-}
-
-.toolbar-subtitle {
-  margin: 2px 0 0;
-  font-size: 0.72rem;
-  color: #7a8493;
+  padding-top: 2px;
 }
 
 .eyebrow,
 .section-kicker {
-  margin: 0 0 2px;
-  font-size: 0.64rem;
-  letter-spacing: 0.14em;
+  margin: 0 0 8px;
+  color: #8e8e93;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  line-height: 1;
   text-transform: uppercase;
-  color: #8a93a1;
 }
 
 .toolbar-title-row {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .toolbar h1,
 .section-header h2,
-.detail-topbar h2,
-.empty-state h3 {
+.empty-state h3,
+.sheet-header h2 {
   margin: 0;
-  color: #20242b;
+  color: #1d1d1f;
 }
 
 .toolbar h1 {
-  font-size: 1.18rem;
-  letter-spacing: -0.03em;
+  font-size: clamp(2rem, 4vw, 3.35rem);
+  font-weight: 750;
+  letter-spacing: -0.055em;
+  line-height: 0.96;
+}
+
+.toolbar-subtitle {
+  max-width: 470px;
+  margin: 12px 0 0;
+  color: #6e6e73;
+  font-size: 0.98rem;
+  line-height: 1.45;
 }
 
 .summary-pill,
@@ -220,74 +200,128 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  min-height: 22px;
+  min-height: 24px;
   border-radius: 999px;
-  padding: 0 8px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  padding: 0 9px;
+  font-size: 0.72rem;
+  font-weight: 650;
 }
 
 .summary-pill,
 .active-chip {
-  color: #2259da;
-  background: #edf3ff;
-  border: 1px solid #d5e3ff;
+  color: #0066cc;
+  background: rgba(0, 122, 255, 0.1);
+  border: 1px solid rgba(0, 122, 255, 0.18);
 }
 
-.meta-chip {
-  color: #596273;
-  background: #f3f5f8;
-  border: 1px solid #e2e7ee;
+.toolbar-drag-fill {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 16px;
+}
+
+.toolbar-controls {
+  /* 路径信息收进右上角系统胶囊，既可核对目录，又不抢主标题注意力。 */
+  display: grid;
+  justify-items: end;
+  gap: 12px;
+  min-width: min(520px, 48vw);
+}
+
+.header-paths {
+  display: grid;
+  gap: 4px;
+  width: min(520px, 48vw);
+  padding: 9px 11px;
+  border: 1px solid rgba(60, 60, 67, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(18px);
+}
+
+.header-path-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+  color: #6e6e73;
+  font-size: 0.74rem;
+}
+
+.header-path-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar-actions {
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .primary-button,
 .ghost-button,
-.mini-button,
-.mode-switch button {
+.mini-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 30px;
-  border-radius: 9px;
-  padding: 0 10px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+  min-height: 32px;
+  border-radius: 999px;
+  padding: 0 13px;
+  color: #1d1d1f;
+  font-size: 0.82rem;
+  font-weight: 650;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
 }
 
 .primary-button:hover,
 .ghost-button:hover,
-.mini-button:hover,
-.mode-switch button:hover {
+.mini-button:hover {
   transform: translateY(-1px);
 }
 
 .primary-button:disabled,
 .ghost-button:disabled,
 .mini-button:disabled {
-  opacity: 0.55;
+  opacity: 0.52;
   cursor: not-allowed;
   transform: none;
 }
 
 .primary-button {
   color: #fff;
-  background: linear-gradient(180deg, #3076ff, #1d63f0);
-  box-shadow: 0 8px 16px rgba(34, 99, 241, 0.18);
+  background: linear-gradient(180deg, #1688ff, #006edb);
+  box-shadow: 0 10px 24px rgba(0, 113, 227, 0.22);
 }
 
 .ghost-button,
 .mini-button {
-  color: #1f2937;
-  background: linear-gradient(180deg, #ffffff, #f3f5f8);
-  border: 1px solid #d9dfe7;
+  border: 1px solid rgba(60, 60, 67, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.ghost-button:hover,
+.mini-button:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 122, 255, 0.26);
 }
 
 .mini-button-danger {
-  color: #ab3d3d;
-  background: linear-gradient(180deg, #fff8f8, #fff1f1);
-  border-color: #f0d4d4;
+  color: #c62b2b;
+  background: rgba(255, 242, 242, 0.8);
+  border-color: rgba(255, 59, 48, 0.18);
 }
 
 .icon-only-button {
@@ -296,32 +330,31 @@ textarea {
 }
 
 .notice-banner {
-  margin-top: 10px;
-  padding: 9px 11px;
-  border-radius: 10px;
-  border: 1px solid #dfe5ec;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(60, 60, 67, 0.1);
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
 }
 
 .notice-success {
-  background: #f2fbf4;
-  border-color: #d7efdc;
+  border-color: rgba(52, 199, 89, 0.18);
+  background: rgba(243, 252, 246, 0.82);
 }
 
 .notice-error {
-  background: #fff4f4;
-  border-color: #f1d9d9;
+  border-color: rgba(255, 59, 48, 0.18);
+  background: rgba(255, 246, 246, 0.86);
 }
 
 .status-copy {
   gap: 12px;
-}
-
-.sync-pills {
-  padding-left: 40px;
 }
 
 .status-copy strong {
@@ -332,95 +365,106 @@ textarea {
 .status-copy p,
 .composer-copy p,
 .empty-state p,
-.profile-card p,
-.actions-card p {
+.profile-card p {
   margin: 0;
-  color: #687282;
-  line-height: 1.5;
+  color: #6e6e73;
+  line-height: 1.48;
 }
 
 .status-icon,
 .error-icon,
 .empty-ornament {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.status-icon,
+.error-icon {
+  width: 30px;
+  height: 30px;
 }
 
 .status-icon {
-  color: #2d8c4a;
+  color: #248a3d;
 }
 
 .error-icon {
-  color: #c04a4a;
+  color: #d70015;
+}
+
+.sync-pills {
+  gap: 8px;
+  padding-left: 42px;
+  flex-wrap: wrap;
 }
 
 .sync-pill {
-  color: #2b6444;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid #dbe9df;
   width: fit-content;
   max-width: 100%;
-  white-space: normal;
+  color: #248a3d;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(52, 199, 89, 0.16);
   line-height: 1.25;
+  white-space: normal;
 }
 
 .sync-pill-muted {
-  color: #7a6270;
-  border-color: #eadde3;
-  background: #fff8fb;
+  color: #8a6a2b;
+  border-color: rgba(255, 159, 10, 0.18);
+  background: rgba(255, 249, 237, 0.78);
 }
 
 .workspace-grid {
+  /* 账号管理是单一主任务，使用单列 App Store 内容卡片避免右侧无效空白。 */
   display: grid;
-  grid-template-columns: 292px minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   flex: 1 1 auto;
+  width: 100%;
   min-height: 0;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.sidebar-panel,
-.detail-panel {
-  min-height: 0;
-  border-radius: 12px;
-  border: 1px solid #e3e7ed;
-  background: #fbfbfc;
 }
 
 .sidebar-panel {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   overflow: hidden;
-  padding: 9px;
+  padding: 20px;
+  border: 1px solid rgba(60, 60, 67, 0.12);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow:
+    0 18px 48px rgba(33, 53, 90, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(26px);
 }
 
-.detail-panel {
-  padding: 12px 14px;
-}
-
-.section-header,
-.detail-topbar {
+.section-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.section-header h2,
-.detail-topbar h2 {
-  font-size: 0.92rem;
+.section-header h2 {
+  font-size: 1.4rem;
+  font-weight: 720;
+  letter-spacing: -0.035em;
 }
 
 .sidebar-header-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.meta-chip {
+  color: #515154;
+  background: rgba(242, 242, 247, 0.82);
+  border: 1px solid rgba(60, 60, 67, 0.1);
 }
 
 .profile-list {
@@ -428,89 +472,134 @@ textarea {
   grid-auto-rows: max-content;
   flex: 1 1 auto;
   min-height: 0;
-  gap: 5px;
+  gap: 10px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: 3px;
+  padding: 1px 5px 3px 1px;
+}
+
+.profile-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profile-list::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(60, 60, 67, 0.2);
+  background-clip: content-box;
 }
 
 .profile-card {
-  border-radius: 9px;
-  border: 1px solid #e4e8ee;
-  background: #fff;
-  padding: 8px;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 132px;
+  padding: 16px;
+  border: 1px solid rgba(60, 60, 67, 0.1);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 8px 26px rgba(0, 0, 0, 0.04);
 }
 
 .profile-card-active {
-  border-color: #cfe0ff;
-  background: linear-gradient(180deg, #f8fbff, #f3f8ff);
-  box-shadow: inset 0 0 0 1px rgba(75, 126, 255, 0.06);
+  border-color: rgba(0, 122, 255, 0.3);
+  background:
+    linear-gradient(180deg, rgba(250, 253, 255, 0.94), rgba(240, 247, 255, 0.92)),
+    #fff;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 122, 255, 0.08),
+    0 14px 32px rgba(0, 122, 255, 0.1);
 }
 
-.profile-card-top,
-.profile-name-row,
-.profile-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  color: #0057d8;
+  font-size: 1.35rem;
+  font-weight: 760;
+  background:
+    radial-gradient(circle at 30% 20%, #ffffff 0%, rgba(255, 255, 255, 0) 48%),
+    linear-gradient(160deg, #e9f2ff 0%, #cfe0ff 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 9px 18px rgba(0, 99, 204, 0.12);
+}
+
+.profile-card-body {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .profile-card-top {
   justify-content: space-between;
+  gap: 12px;
 }
 
 .profile-primary {
   min-width: 0;
 }
 
+.profile-name-row,
+.profile-meta-row,
+.profile-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .profile-name-row {
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .profile-name-row strong {
-  font-size: 0.88rem;
-  font-weight: 700;
+  font-size: 1.08rem;
+  font-weight: 720;
+  letter-spacing: -0.02em;
 }
 
 .profile-meta-row {
-  margin-top: 6px;
+  margin-top: 14px;
 }
 
 .profile-meta-row span {
   border-radius: 999px;
-  background: #f4f6f8;
-  border: 1px solid #e6eaef;
-  color: #717b89;
-  font-size: 0.68rem;
-  padding: 0.18rem 0.48rem;
+  background: rgba(242, 242, 247, 0.86);
+  border: 1px solid rgba(60, 60, 67, 0.1);
+  color: #6e6e73;
+  font-size: 0.74rem;
+  padding: 0.22rem 0.56rem;
 }
 
 .profile-actions {
-  margin-top: 6px;
+  margin-top: 14px;
 }
 
-.detail-topbar {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eceff4;
+.empty-state {
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 28px;
+  border: 1px solid rgba(60, 60, 67, 0.1);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.68);
 }
 
-.inactive-card,
-.empty-state,
-.actions-card {
-  border-radius: 12px;
-  border: 1px solid #e6eaf0;
-  background: #fff;
+.compact-empty {
+  min-height: 260px;
 }
 
-.inactive-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 0 12px;
-  color: #6a7382;
-  margin-bottom: 10px;
+.empty-ornament {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 14px;
+  color: #0071e3;
+  border-radius: 18px;
+  background: rgba(0, 122, 255, 0.1);
 }
 
 .sheet-backdrop {
@@ -519,50 +608,27 @@ textarea {
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(29, 33, 41, 0.22);
-  backdrop-filter: blur(10px);
+  background: rgba(28, 28, 30, 0.24);
+  backdrop-filter: blur(18px);
 }
 
 .sheet-panel {
   width: min(500px, 100%);
-  border-radius: 14px;
-  border: 1px solid #dfe5ec;
-  background: linear-gradient(180deg, #ffffff, #fafbfd);
-  box-shadow: 0 18px 44px rgba(25, 31, 39, 0.22);
-  padding: 14px;
+  border: 1px solid rgba(60, 60, 67, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.22);
+  padding: 18px;
 }
 
 .sheet-header {
   justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.mode-switch {
-  display: inline-grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
-  padding: 3px;
-  border-radius: 11px;
-  background: #f1f3f6;
-  border: 1px solid #e2e7ee;
-}
-
-.mode-switch button {
-  min-width: 150px;
-  min-height: 32px;
-  border-radius: 9px;
-  color: #657080;
-  background: transparent;
-}
-
-.mode-switch .mode-active {
-  color: #1f2329;
-  background: #fff;
-  border: 1px solid #dde3eb;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .composer-copy {
-  margin: 12px 0 14px;
+  margin: 12px 0 16px;
 }
 
 .form-grid {
@@ -581,63 +647,18 @@ textarea {
 }
 
 .field span {
+  color: #515154;
   font-size: 0.78rem;
-  font-weight: 600;
-  color: #5b6574;
+  font-weight: 650;
 }
 
 .form-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid #eceff4;
-}
-
-.empty-state {
-  min-height: 260px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  padding: 22px;
-}
-
-.compact-empty {
-  min-height: 220px;
-}
-
-.empty-ornament {
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 12px;
-  color: #276cf3;
-  background: #eef4ff;
-  border-radius: 14px;
-}
-
-.actions-card {
-  padding: 14px;
-}
-
-.actions-card-copy h3 {
-  margin: 0 0 6px;
-  font-size: 1rem;
-}
-
-.actions-card-copy p {
-  margin: 0;
-  color: #687282;
-  line-height: 1.5;
-}
-
-.actions-grid,
-.active-summary-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 14px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(60, 60, 67, 0.1);
 }
 
 .spin {
@@ -655,61 +676,64 @@ textarea {
 }
 
 @media (max-width: 1040px) {
-  .toolbar,
-  .detail-topbar,
-  .section-header {
+  .app-header {
+    padding-left: 28px;
+  }
+
+  .toolbar {
     flex-direction: column;
-    align-items: stretch;
   }
 
   .toolbar-controls,
   .header-paths {
     justify-items: stretch;
-    max-width: none;
+    width: 100%;
+    min-width: 0;
   }
 
   .header-path-row {
     justify-content: flex-start;
   }
 
-  .workspace-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar-panel,
-  .detail-panel {
-    min-height: 0;
+  .toolbar-actions {
+    justify-content: flex-start;
   }
 }
 
 @media (max-width: 720px) {
-  #root {
-    padding: 12px;
-  }
-
   .app-header {
-    padding-inline: 12px;
+    padding: 18px;
   }
 
   .app-main {
-    padding-inline: 12px;
+    padding: 0 18px 18px;
+  }
+
+  .toolbar-left,
+  .section-header,
+  .sheet-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-mark {
+    width: 60px;
+    height: 60px;
   }
 
   .toolbar-actions,
   .profile-actions,
-  .active-summary-actions,
-  .actions-grid,
-  .sheet-header,
   .sidebar-header-meta {
     width: 100%;
   }
 
   .toolbar-actions > *,
-  .profile-actions > *,
-  .active-summary-actions > *,
-  .actions-grid > *,
-  .sheet-header > * {
+  .profile-actions > * {
     flex: 1 1 100%;
+  }
+
+  .profile-card {
+    flex-direction: column;
   }
 
   .form-grid {
@@ -720,19 +744,7 @@ textarea {
     grid-column: auto;
   }
 
-  .mode-switch {
-    width: 100%;
-  }
-
-  .mode-switch button {
-    min-width: 0;
-  }
-
   .form-footer {
     flex-direction: column;
-  }
-
-  .toolbar {
-    padding-left: 0;
   }
 }
