@@ -103,6 +103,13 @@ Chrome/Safari 直接下载未公证 DMG 时，macOS 仍可能给文件写入 `co
 curl -fsSL https://github.com/kingcwt/codex-account-switcher/releases/latest/download/install-macos.sh | bash
 ```
 
+也可以用 Homebrew Cask 安装：
+
+```bash
+brew tap kingcwt/codex-account-switcher
+brew install --cask codex-account-switcher
+```
+
 安装完成后，应用内自动更新继续使用 Tauri updater 的签名校验。
 
 ## 安装 VS Code Bridge
