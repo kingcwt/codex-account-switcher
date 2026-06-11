@@ -1,6 +1,6 @@
 [package]
 name = "codex-account-switcher"
-version = "0.1.6"
+version = "0.1.7"
 description = "Menu bar profile switcher for Codex accounts and proxy configs."
 authors = ["cuihongran"]
 edition = "2021"
