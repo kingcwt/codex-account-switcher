@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// 生成命令行安装脚本：通过 curl 下载不会写入浏览器 quarantine，并在复制后再次清理隔离属性。
+// 生成命令行安装脚本：直接下载 updater app 压缩包，避免暴露浏览器可误点的 DMG 安装包。
 const args = process.argv.slice(2);
 const getArg = (name) => {
   const index = args.indexOf(name);
@@ -24,34 +24,31 @@ if (!repository) {
 }
 
 const productName = tauriConfig.productName;
-const version = tag.replace(/^v/, '');
-const uploadedDmgName = `${productName}_${version}_${arch}.dmg`.replaceAll(' ', '.');
-const dmgUrl = `https://github.com/${repository}/releases/download/${encodeURIComponent(tag)}/${encodeURIComponent(uploadedDmgName)}`;
+const uploadedArchiveName = `${productName}.app.tar.gz`.replaceAll(' ', '.');
 
 const script = `#!/usr/bin/env bash
 set -euo pipefail
 
 APP_NAME="${productName}"
-DMG_URL="${dmgUrl}"
+REPOSITORY="${repository}"
+DEFAULT_VERSION="${tag}"
+VERSION="\${VERSION:-$DEFAULT_VERSION}"
+ARCHIVE_NAME="${uploadedArchiveName}"
+ARCHIVE_URL="https://github.com/\${REPOSITORY}/releases/download/\${VERSION}/\${ARCHIVE_NAME}"
 
 TMP_DIR="$(mktemp -d)"
-DMG_PATH="$TMP_DIR/$APP_NAME.dmg"
-MOUNT_DIR="$(mktemp -d)"
+ARCHIVE_PATH="$TMP_DIR/$APP_NAME.app.tar.gz"
 
 cleanup() {
-  hdiutil detach "$MOUNT_DIR" -quiet >/dev/null 2>&1 || true
-  rm -rf "$TMP_DIR" "$MOUNT_DIR"
+  rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
 
-echo "Downloading $APP_NAME..."
-curl -fL "$DMG_URL" -o "$DMG_PATH"
+echo "Downloading $APP_NAME $VERSION..."
+curl -fL "$ARCHIVE_URL" -o "$ARCHIVE_PATH"
 
-# Chrome/Safari 下载会写入 quarantine；命令行安装时主动清理，避免 Gatekeeper 误拦截未公证的内部应用。
-xattr -c "$DMG_PATH" >/dev/null 2>&1 || true
-
-echo "Mounting installer..."
-hdiutil attach "$DMG_PATH" -nobrowse -quiet -mountpoint "$MOUNT_DIR"
+echo "Extracting app..."
+tar -xzf "$ARCHIVE_PATH" -C "$TMP_DIR"
 
 INSTALL_DIR="/Applications"
 if [ ! -w "$INSTALL_DIR" ]; then
@@ -61,7 +58,7 @@ fi
 
 echo "Installing to $INSTALL_DIR..."
 rm -rf "$INSTALL_DIR/$APP_NAME.app"
-ditto "$MOUNT_DIR/$APP_NAME.app" "$INSTALL_DIR/$APP_NAME.app"
+ditto "$TMP_DIR/$APP_NAME.app" "$INSTALL_DIR/$APP_NAME.app"
 xattr -dr com.apple.quarantine "$INSTALL_DIR/$APP_NAME.app" >/dev/null 2>&1 || true
 
 codesign --verify --deep --strict --verbose=2 "$INSTALL_DIR/$APP_NAME.app"

@@ -59,20 +59,19 @@ jobs:
       - name: Generate macOS install script
         run: node scripts/generate-macos-install-script.mjs --tag "${{ github.ref_name }}" --repository "${{ github.repository }}" --arch aarch64 --output install-macos.sh
 
-      # 发布 DMG、updater 包、签名、manifest 和命令行安装脚本。
+      # 发布 updater 包、签名、manifest 和命令行安装脚本；DMG 不上传，避免用户浏览器下载后误点触发 Gatekeeper。
       - name: Publish GitHub Release assets
         uses: softprops/action-gh-release@v2
         with:
           name: Codex Account Switcher ${{ github.ref_name }}
           body: |
-            macOS installation packages and updater metadata are attached below.
+            macOS updater artifacts and install script are attached below.
 
-            If Chrome blocks the downloaded DMG, install with:
+            Install with:
             curl -fsSL https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/install-macos.sh | bash
           draft: false
           prerelease: false
           files: |
-            src-tauri/target/release/bundle/dmg/*.dmg
             src-tauri/target/release/bundle/macos/*.app.tar.gz
             src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
             latest.json

@@ -69,8 +69,8 @@ cargo check --manifest-path src-tauri/Cargo.toml
 
 - `dev`：日常源码开发分支
 - `main`：项目介绍、下载入口和稳定说明
-- `v*` tag：触发 GitHub Actions 自动构建并发布安装包
-- GitHub Releases：存放 `.dmg`、`.app.tar.gz`、签名和 `latest.json`
+- `v*` tag：触发 GitHub Actions 自动构建并发布应用产物
+- GitHub Releases：存放 `.app.tar.gz`、签名、`latest.json` 和安装脚本
 
 首次发版前需要生成 Tauri updater 签名密钥，并把密钥写入仓库 Secrets。私钥只放 Secrets，不提交到仓库。
 
@@ -91,16 +91,22 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-GitHub Actions 会构建 macOS 安装包并上传到当前仓库的 Release。应用内“检查更新”会读取当前仓库最新 Release 的 `latest.json`，校验签名后安装更新，重启应用后生效。
+GitHub Actions 会构建 macOS 应用产物并上传到当前仓库的 Release。应用内“检查更新”会读取当前仓库最新 Release 的 `latest.json`，校验签名后安装更新，重启应用后生效。
 
 ### macOS 下载安全校验
 
-当前 macOS Release 采用参考项目的兼容链路：Tauri 生成原始产物后，脚本会清理 app bundle 扩展属性、执行 ad-hoc 重签、重做 DMG，并用重签后的 app 重新生成 updater 压缩包和签名。
+当前 macOS Release 采用参考项目的兼容链路：Tauri 生成原始产物后，脚本会清理 app bundle 扩展属性、执行 ad-hoc 重签，并用重签后的 app 重新生成 updater 压缩包和签名。
 
-Chrome/Safari 直接下载未公证 DMG 时，macOS 仍可能给文件写入 `com.apple.quarantine` 并触发 Gatekeeper 拦截。Release 会额外上传 `install-macos.sh`，通过命令行下载、安装并清理隔离属性：
+Release 不再上传可被浏览器误点的 DMG。首次安装请使用 Release 中的 `install-macos.sh`，脚本会直接下载 `.app.tar.gz`、安装应用并清理隔离属性：
 
 ```bash
 curl -fsSL https://github.com/kingcwt/codex-account-switcher/releases/latest/download/install-macos.sh | bash
+```
+
+安装指定版本：
+
+```bash
+VERSION=v0.1.3 curl -fsSL https://github.com/kingcwt/codex-account-switcher/releases/latest/download/install-macos.sh | bash
 ```
 
 也可以用 Homebrew Cask 安装：

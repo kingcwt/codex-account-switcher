@@ -1,8 +1,8 @@
 cask "codex-account-switcher" do
   version "0.1.3"
-  sha256 "4d5cbe38b54295de88dcfd77c0c100d5013ed30157cb8c6db2c82a8ab3925484"
+  sha256 "f3a4de42e40dcd1f1637d1ccf8747e48f9a4f4f77a1fd1a90a649bcfb332c43b"
 
-  url "https://github.com/kingcwt/codex-account-switcher/releases/download/v#{version}/Codex.Account.Switcher_#{version}_aarch64.dmg"
+  url "https://github.com/kingcwt/codex-account-switcher/releases/download/v#{version}/Codex.Account.Switcher.app.tar.gz"
   name "Codex Account Switcher"
   desc "Menu bar profile switcher for Codex accounts and proxy configs"
   homepage "https://github.com/kingcwt/codex-account-switcher"
