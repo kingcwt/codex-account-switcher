@@ -36,6 +36,7 @@ struct AppStatePayload {
     active_profile_id: Option<String>,
     codex_home: String,
     profiles_home: String,
+    app_version: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -318,7 +319,7 @@ fn clear_active_profile_id() -> Result<(), String> {
     Ok(())
 }
 
-fn load_state_payload() -> Result<AppStatePayload, String> {
+fn load_state_payload(app: &AppHandle) -> Result<AppStatePayload, String> {
     let profiles = load_profiles()?;
     let active_profile_id = read_active_profile_id()?;
 
@@ -327,6 +328,8 @@ fn load_state_payload() -> Result<AppStatePayload, String> {
         active_profile_id,
         codex_home: codex_home_dir()?.display().to_string(),
         profiles_home: profiles_dir()?.display().to_string(),
+        // 版本号必须来自当前运行的安装包，避免用源码 package.json 误判用户实际安装版本。
+        app_version: app.package_info().version.to_string(),
     })
 }
 
@@ -519,7 +522,7 @@ fn refresh_tray_menu(app: &AppHandle) -> Result<(), tauri::Error> {
     Ok(())
 }
 
-fn activate_profile(profile_id: &str) -> Result<ActionResult, String> {
+fn activate_profile(app: &AppHandle, profile_id: &str) -> Result<ActionResult, String> {
     ensure_account_switcher_dirs()?;
 
     let target_meta_path = profile_meta_path(profile_id)?;
@@ -556,15 +559,15 @@ fn activate_profile(profile_id: &str) -> Result<ActionResult, String> {
     };
 
     Ok(ActionResult {
-        state: load_state_payload()?,
+        state: load_state_payload(app)?,
         message,
         desktop_sync: Some(desktop_sync),
     })
 }
 
 #[tauri::command]
-fn load_state() -> Result<AppStatePayload, String> {
-    load_state_payload()
+fn load_state(app: AppHandle) -> Result<AppStatePayload, String> {
+    load_state_payload(&app)
 }
 
 #[tauri::command]
@@ -595,7 +598,7 @@ fn import_current_profile(app: AppHandle, payload: ImportCurrentPayload) -> Resu
     set_active_profile_id(&profile_id)?;
 
     let result = ActionResult {
-        state: load_state_payload()?,
+        state: load_state_payload(&app)?,
         message: format!("已成功导入“{}”，并设为当前激活账号。", summary.name),
         desktop_sync: None,
     };
@@ -653,7 +656,7 @@ fn create_proxy_profile(app: AppHandle, payload: CreateProxyPayload) -> Result<A
     );
 
     let result = ActionResult {
-        state: load_state_payload()?,
+        state: load_state_payload(&app)?,
         message,
         desktop_sync: Some(desktop_sync),
     };
@@ -664,7 +667,7 @@ fn create_proxy_profile(app: AppHandle, payload: CreateProxyPayload) -> Result<A
 
 #[tauri::command]
 fn switch_profile(app: AppHandle, profile_id: String) -> Result<ActionResult, String> {
-    let result = activate_profile(&profile_id)?;
+    let result = activate_profile(&app, &profile_id)?;
     emit_state_update(&app, &result.state);
     let _ = refresh_tray_menu(&app);
     Ok(result)
@@ -684,7 +687,7 @@ fn resync_active_profile(app: AppHandle, profile_id: String) -> Result<ActionRes
     let summary = read_profile_summary(&profile_meta_path(&profile_id)?)?;
 
     let result = ActionResult {
-        state: load_state_payload()?,
+        state: load_state_payload(&app)?,
         message: format!("已将当前 Codex 最新状态重新保存到“{}”。", summary.name),
         desktop_sync: None,
     };
@@ -712,7 +715,7 @@ fn update_profile(app: AppHandle, payload: UpdateProfilePayload) -> Result<Actio
     save_profile_snapshot(&payload.profile_id, &summary, &config_contents, &auth_contents)?;
 
     let result = ActionResult {
-        state: load_state_payload()?,
+        state: load_state_payload(&app)?,
         message: format!("已更新“{}”的名称与备注。", summary.name),
         desktop_sync: None,
     };
@@ -739,7 +742,7 @@ fn delete_profile(app: AppHandle, payload: DeleteProfilePayload) -> Result<Actio
     }
 
     let result = ActionResult {
-        state: load_state_payload()?,
+        state: load_state_payload(&app)?,
         message: format!("已删除“{}”。", summary.name),
         desktop_sync: None,
     };
@@ -754,7 +757,7 @@ fn sync_desktop_clients(app: AppHandle) -> Result<ActionResult, String> {
 
     let desktop_sync = sync_desktop_apps();
     let result = ActionResult {
-        state: load_state_payload()?,
+        state: load_state_payload(&app)?,
         message: desktop_sync.notes.join("；"),
         desktop_sync: Some(desktop_sync),
     };
@@ -856,7 +859,7 @@ fn build_tray(app: &AppHandle) -> Result<(), tauri::Error> {
             TRAY_ITEM_QUIT => app.exit(0),
             id if id.starts_with("profile::") => {
                 let profile_id = id.trim_start_matches("profile::");
-                if let Ok(result) = activate_profile(profile_id) {
+                if let Ok(result) = activate_profile(app, profile_id) {
                     emit_state_update(app, &result.state);
                     let _ = refresh_tray_menu(app);
                 }

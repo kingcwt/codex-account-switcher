@@ -388,6 +388,10 @@ function App() {
 										"~/.codex-switchboard/profiles"}
 								</span>
 							</div>
+							{/* 版本号用于确认当前运行的安装包，保持低调避免抢占主操作入口。 */}
+							<div className="header-version-row">
+								<span>版本 {appState?.app_version ?? "未知"}</span>
+							</div>
 						</div>
 
 						<div className="toolbar-actions">

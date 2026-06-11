@@ -257,6 +257,15 @@ textarea {
   white-space: nowrap;
 }
 
+/* 版本号只用于排查安装包来源，视觉上弱于路径和操作按钮。 */
+.header-version-row {
+  display: flex;
+  justify-content: flex-end;
+  color: rgba(110, 110, 115, 0.72);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
 .toolbar-actions {
   justify-content: flex-end;
   gap: 8px;

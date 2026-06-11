@@ -16,6 +16,8 @@ export type AppStatePayload = {
   active_profile_id: string | null
   codex_home: string
   profiles_home: string
+  // 这里展示的是当前运行安装包版本，不等同于源码 package.json 的开发版本。
+  app_version: string
 }
 
 export type ActionResult = {
