@@ -154,6 +154,10 @@ src/             React 前端与 Tauri 调用封装
 src-tauri/       Tauri 桌面端、Profile 文件管理和菜单栏逻辑
 vscode-bridge/   VS Code 扩展宿主刷新桥接扩展
 ```
+## 效果图
+
+![alt text](image.png)
+
 
 ## 安全提示
 
